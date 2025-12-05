@@ -10,6 +10,11 @@ import * as ImagePicker from 'expo-image-picker';
 // Use the selected image step 4 120525 AM
 import { useState } from "react";     // declare a state variable using the useState hook
 
+// splash screen junk (does not work)
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
+setTimeout(SplashScreen.hideAsync, 5000);
+
 // ~ does not resolve to root 120525 AM
 // NOTE: @ symbol is a custom path alias for importing custom components and other modules instead of relative paths, configured in tsconfig.json
 const PlaceholderImage = require('@/assets/images/background-image.png');
