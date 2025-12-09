@@ -12,6 +12,7 @@ import EmojiList from "@/components/EmojiList";
 import EmojiSticker from "@/components/EmojiSticker";
 // BEGIN IMPORT COMPONENTS FOR BEATLE -- STARTED 120825 AM
 import PausePlayButton from "@/components/PausePlayButton";
+// temp to test out SoundButton
 
 /* Import style code -- replaced .. with @ */
 import { stylesMain } from '@/styles/stylesMain';
@@ -26,6 +27,7 @@ import { useState } from "react";     // declare a state variable using the useS
 // Add gestures. 120825 AM
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AntDesign } from "@expo/vector-icons";
+import { SoundButton } from "@/components/SoundSelection";
 
 // splash screen junk (does not work)
 /*import * as SplashScreen from 'expo-splash-screen';
@@ -106,11 +108,22 @@ export default function Index() {
             <CircleButton onPress={onAddSticker} />
             <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
           </View>
+          <SoundButton
+            onPress={togglePausePlay}
+            w={300}
+            selectedSound='Drum'
+          />
         </View>
       ) : (
         <View style={styles.footerContainer}>
           <Button theme="primary" label="Choose a photo" onPress={pickImageAsync} />
-          <Button label="Use this photo" />
+          <View style={styles.footerContainer}>
+            <PausePlayButton
+              onPress={togglePausePlay}
+              pausePlayIcon={pausePlayIcon}
+              width={300}
+            />
+          </View>
         </View>
       )}
       {/* Replace text with PausePlayButton component wrapped in a View 120825 AM */}
@@ -119,13 +132,7 @@ export default function Index() {
         <Text style={styles.text}>Home screen</Text>
         <Link href="/tabs/about" style={styles.button}>Go to About screen</Link>
       </View>*/}
-      <View style={styles.footerContainer}>
-        <PausePlayButton
-          onPress={togglePausePlay}
-          pausePlayIcon={pausePlayIcon}
-          width={300}
-        />
-      </View>
+      
       <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
         {/* Emoji list component will go here */}
         <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
