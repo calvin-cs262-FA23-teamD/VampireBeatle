@@ -13,6 +13,10 @@ import EmojiSticker from "@/components/EmojiSticker";
 // BEGIN IMPORT COMPONENTS FOR BEATLE -- STARTED 120825 AM
 import PausePlayButton from "@/components/PausePlayButton";
 
+/* Import style code -- replaced .. with @ */
+import { stylesMain } from '@/styles/stylesMain';
+import { COLORS } from '@/styles/colors';
+
 
 // Use an image picker step 2 120525 AM
 import * as ImagePicker from 'expo-image-picker';
