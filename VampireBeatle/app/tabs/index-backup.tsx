@@ -10,9 +10,6 @@ import IconButton from "@/components/IconButton";
 import EmojiPicker from "@/components/EmojiPicker";
 import EmojiList from "@/components/EmojiList";
 import EmojiSticker from "@/components/EmojiSticker";
-// BEGIN IMPORT COMPONENTS FOR BEATLE -- STARTED 120825 AM
-import PausePlayButton from "@/components/PausePlayButton";
-
 
 // Use an image picker step 2 120525 AM
 import * as ImagePicker from 'expo-image-picker';
@@ -21,7 +18,6 @@ import { useState } from "react";     // declare a state variable using the useS
 
 // Add gestures. 120825 AM
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AntDesign } from "@expo/vector-icons";
 
 // splash screen junk (does not work)
 /*import * as SplashScreen from 'expo-splash-screen';
@@ -38,9 +34,6 @@ export default function Index() {
   const [showAppOptions, setShowAppOptions] = useState<boolean>(false);       // declare a boolean state variable to show/hide buttons that open the modal 120825 AM
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);       // hides the modal until the user presses the button to open it
   const [pickedEmoji, setPickedEmoji] = useState<ImageSourcePropType | undefined>(undefined);
-
-  // BEGIN HOOKS SPECIFIC TO BEATLE -- STARTED 120825 AM
-  const [pausePlayIcon, setPausePlayIcon] = useState<keyof typeof AntDesign.glyphMap>('caret-right');       // component expects typed prop; 'caret-right' is a valid AntDesign icon
 
   // Use an image picker step 2 120525 AM
   const pickImageAsync = async () => {
@@ -80,13 +73,6 @@ export default function Index() {
     setIsModalVisible(false);
   };
 
-  // BEGIN FUNCTIONS SPECIFIC TO BEATLE -- STARTED 120825 AM
-  const togglePausePlay = () => {
-    setPausePlayIcon((PausePlayIcon) => (PausePlayIcon === 'caret-right' ? 'pause' : 'caret-right'));
-    // additional code to handle pausing/playing audio will go here TODO
-  }
-
-
   return (
 
     <GestureHandlerRootView style={styles.container}>
@@ -109,18 +95,9 @@ export default function Index() {
           <Button label="Use this photo" />
         </View>
       )}
-      {/* Replace text with PausePlayButton component wrapped in a View 120825 AM */}
-      {/*
       <View>
         <Text style={styles.text}>Home screen</Text>
         <Link href="/tabs/about" style={styles.button}>Go to About screen</Link>
-      </View>*/}
-      <View style={styles.footerContainer}>
-        <PausePlayButton
-          onPress={togglePausePlay}
-          pausePlayIcon={pausePlayIcon}
-          width={300}
-        />
       </View>
       <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
         {/* Emoji list component will go here */}
