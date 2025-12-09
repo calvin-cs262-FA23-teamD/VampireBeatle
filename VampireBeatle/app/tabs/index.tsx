@@ -74,7 +74,9 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
+
+    <GestureHandlerRootView style={styles.container}>
+    {/*<View style={styles.container}>*/}
       <View style={styles.imageContainer}>
         <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
         {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
@@ -101,7 +103,8 @@ export default function Index() {
         {/* Emoji list component will go here */}
         <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
       </EmojiPicker>
-    </View>
+    {/*</View>*/}
+    </GestureHandlerRootView>
   );
 }
 
