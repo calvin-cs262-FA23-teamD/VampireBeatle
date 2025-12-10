@@ -13,7 +13,7 @@ type Props = {
     onPress: () => void;
     pausePlayIcon: keyof typeof AntDesign.glyphMap;
     width: number;
-}
+};
 
 export default function PausePlayButton({ onPress, pausePlayIcon, width }: Props) {
     return (
