@@ -70,6 +70,14 @@ export const stylesMain = StyleSheet.create({
         backgroundColor: COLORS.orange,
     },
 
+    footer: {
+        flex: 0.75,
+        width: '100%',
+        alignContent: 'flex-end',
+        justifyContent: 'center',
+        paddingBottom: 12,
+    },
+
     header: {
         width: '100%',
         alignItems: 'center',

@@ -16,7 +16,7 @@ type CounterProps = {
     setBeat: React.Dispatch<React.SetStateAction<number>>;      // passed to setValue from BoxyBox
     BPM: number;        // passed to value from BoxyBox (number)
     setBPM: React.Dispatch<React.SetStateAction<number>>;       // passed to setValue from BoxyBox
-    buttonStates: [number];     // passed to buttonStates from AccentButtons
+    buttonStates: number[];     // passed to buttonStates from AccentButtons
     setButtonStates: React.Dispatch<React.SetStateAction<number[]>>;  // passed to setButtonStates from AccentButtons
 };
 

@@ -1,5 +1,5 @@
-import { ImageSourcePropType, Text, View, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableOpacity } from "react-native";
-import { Link } from "expo-router";     // from tutorial app - probably can delete TODO
+import { ImageSourcePropType, Text, View, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableOpacity, Modal } from "react-native";
+import { Link, useRouter } from "expo-router";     // from tutorial app - CANNOT delete - now used for navigation
 import { Image } from "expo-image";     // from tutorial app - probably can delete TODO
 
 
@@ -17,7 +17,7 @@ import Counters from '@/components/Counters';
 //import { Modal } from '../components/Modal.tsx';
 import SoundModal, { switchSound } from '@/components/SoundSelection';
 import SoundButton from '@/components/SoundButton';
-//import MetronomeWriting from '../components/MetronomeWriting';
+import MetronomeWriting from '@/components/MetronomeWriting';
 
 /* Import style code -- replaced .. with @ */
 import { stylesMain } from '@/styles/stylesMain';
@@ -48,6 +48,9 @@ export default function Index() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);       // hides the modal until the user presses the button to open it
   const [pickedEmoji, setPickedEmoji] = useState<ImageSourcePropType | undefined>(undefined);
 
+
+  const router = useRouter();     // added to allow navigation using this version of the Expo Router
+
   // BEGIN HOOKS SPECIFIC TO BEATLE -- STARTED 120825 AM
   const [pausePlayIcon, setPausePlayIcon] = useState<keyof typeof AntDesign.glyphMap>('caret-right');       // component expects typed prop; 'caret-right' is a valid AntDesign icon
   const [BPM, setBPM] = useState(60); // beats per minute
@@ -60,6 +63,7 @@ export default function Index() {
 
   // Use an image picker step 2 120525 AM
   const pickImageAsync = async () => {
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -102,8 +106,17 @@ export default function Index() {
     // additional code to handle pausing/playing audio will go here TODO
   }
 
+  /* handle the popup screen for changing the technical writing */
+  const [isMetronomeWritingVisible, setIsMetronomeWritingVisible] = useState(false);
+  const handleMetronomeWriting = () => {
+    setIsMetronomeWritingVisible(() => !isMetronomeWritingVisible);
+  }
 
-
+  /* handle the popup screen for changing the sound */
+  const [isSoundModalVisible, setIsSoundModalVisible] = useState(false);
+  const handleSoundModal = () => {
+    setIsSoundModalVisible(() => !isSoundModalVisible);
+  };
 
   return (
 
@@ -127,7 +140,7 @@ export default function Index() {
             <View style={[stylesMain.subView, { flex: 1 }]}>
               <TouchableOpacity
                 style={[stylesMain.backButton, { backgroundColor: COLORS.buttonBackground, width: 50 }]}
-                onPress={() => alert('Metronome writing will go here')}
+                onPress={handleMetronomeWriting}
               >
                 <AntDesign name="question" size={24} color={COLORS.offWhite} />
               </TouchableOpacity>
@@ -150,7 +163,39 @@ export default function Index() {
               <SoundButton onPress={() => alert('Do something when button is pressed')} w={300} selectedSound='Default' />
             </View>
           </View>
+
+          <View style={[stylesMain.footer, {}]}>
+            <TouchableOpacity
+              style={[stylesMain.flatButton, { alignSelf: 'center', marginBottom: 10 }]}
+              onPress={() => {
+                //if (isPlaying) {
+                if (pausePlayIcon === 'pause') {    // if "playing" (TODO later)
+                  togglePausePlay();
+                }
+                // navigate to trackbuilder using Expo Router
+                router.push("/tabs/Trackbuilder");
+              }}
+            >
+              <Text style={[stylesMain.text, { color: COLORS.background }]}>Trackbuilder </Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
+
+        <Modal
+          visible={isMetronomeWritingVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setIsMetronomeWritingVisible(false)}
+        >
+          <View style={{ flex: 1, backgroundColor: COLORS.buttonBackground }}>
+            <MetronomeWriting
+              isModalVisible={isMetronomeWritingVisible}
+              setIsModalVisible={setIsMetronomeWritingVisible}
+            />
+          </View>
+        </Modal>
+
       </ScrollView>
 
     </KeyboardAvoidingView>
