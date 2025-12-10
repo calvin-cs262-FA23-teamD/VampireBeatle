@@ -5,6 +5,23 @@ import { COLORS } from '@/styles/colors';   // use @ instead of ./ 120925
 
 // alphabeticized StylesMain
 export const stylesMain = StyleSheet.create({
+    backButton: {
+        borderRadius: 20,
+        marginHorizontal: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 5,
+        width: 50,
+        height: 50,
+        backgroundColor: COLORS.orange,
+    },
+    
+    body: {
+        flex: 10,
+        justifyContent: 'center',
+        width: '100%',
+    },
+
     boxed: {
         rowGap: 7,
     },
@@ -34,6 +51,14 @@ export const stylesMain = StyleSheet.create({
         padding: 3,
     },
 
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    },
+
     flatButton: {
         borderRadius: 20,
         marginHorizontal: 20,
@@ -43,6 +68,13 @@ export const stylesMain = StyleSheet.create({
         width: 300,
         height: 50,
         backgroundColor: COLORS.orange,
+    },
+
+    header: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        flex: 1.5,
     },
 
     plusMinusButtons: {

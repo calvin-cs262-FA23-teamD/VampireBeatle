@@ -13,7 +13,7 @@ import { COLORS } from '@/styles/colors';
 // attempt to type properties for generateButtons 120925 AM
 type AccentButtonProps = {
     numButtons: number;
-    buttonStates: [number];
+    buttonStates: number[];
     //setButtonStates: (value: number) => void;
     setButtonStates: React.Dispatch<React.SetStateAction<number[]>>;
     buttonSize: number;
