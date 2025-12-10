@@ -9,6 +9,15 @@ export const stylesMain = StyleSheet.create({
         rowGap: 7,
     },
 
+    // BoxyBox (used for tempo and beat counters)
+    boxyBoxes: {
+        borderRadius: 25,
+        alignItems: 'center',
+        backgroundColor: COLORS.buttonBackground,
+        padding: 5,
+        //border: 10,       // TROUBLESHOOT TODO
+    },
+
     button: {
         borderRadius: 25,
         width: '100%',
@@ -16,6 +25,13 @@ export const stylesMain = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
+    },
+
+    buttonContainer: {
+        marginHorizontal: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 3,
     },
 
     flatButton: {
@@ -27,6 +43,11 @@ export const stylesMain = StyleSheet.create({
         width: 300,
         height: 50,
         backgroundColor: COLORS.orange,
+    },
+
+    plusMinusButtons: {
+        alignItems: 'center',
+        flex: 1,
     },
 
     subView: {
@@ -47,5 +68,10 @@ export const stylesMain = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 26,
         marginTop: -5,
-    }
+    },
+
+    valueText: {
+        alignItems: 'center',
+        flex: 1,
+    },
 });
