@@ -64,7 +64,7 @@ export default function BoxyBox({
             interval = setInterval(() => {
                 handleIncrement();
                 clearIntervalIfNecessary();
-            }, 50);
+            }, 150);        // CHANGE 50 -> 150 to avoid triggering onPressIn and onPress at same time
         }
 
         if (decrementing) {
@@ -73,7 +73,7 @@ export default function BoxyBox({
             interval = setInterval(() => {
                 handleDecrement();
                 clearIntervalIfNecessary();
-            }, 50);
+            }, 150);    // CHANGE 50 -> 150 to avoid triggering onPressIn and onPress at same time
         }
 
         return () => {
