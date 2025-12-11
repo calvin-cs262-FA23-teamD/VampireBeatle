@@ -49,13 +49,14 @@ export default function Index() {
   const [accentSoundFile, setAccentSoundFile] = useState<number>(require('@/assets/sounds/metronome/metronomeaccent.mp3'));
   // add silence
   const [silentSoundFile, setSilentSoundFile] = useState<number>(require('@/assets/sounds/silent/silence.mp3'));
-  //const [actualSoundFileToPlay, setActualSoundFileToPlay] = useState<number>(normalSoundFile); // current loaded sound -- replace sound and setSound 121125 AM
+  
+  const [actualSoundFileToPlay, setActualSoundFileToPlay] = useState<number>(normalSoundFile); // current loaded sound -- replace sound and setSound 121125 AM
   
   const [measure, setMeasure] = useState(-1); // current measure
   const [isPlaying, setIsPlaying] = useState(false);
 
   // NOTE: player is already a hook and will update whenever normalSoundFile changes -- added 121125 AM
-  const player = useAudioPlayer(normalSoundFile);   // TEST AudioPlayer
+  const player = useAudioPlayer(actualSoundFileToPlay);   // TEST AudioPlayer
 
 
   const [buttonStates, setButtonStates] = useState(
@@ -69,7 +70,7 @@ export default function Index() {
   let actual: number = 0;       // define before using
   const interval: number = (60 / BPM) * 1000;
 
-  let beatSound: number;      // What type is this - passed to a particular index of buttonStates[]
+  let accentIndicator: number;      // What type is this - passed to a particular index of buttonStates[]
 
   // BEGIN FUNCTIONS SPECIFIC TO BEATLE -- STARTED 120825 AM
   const togglePausePlay = () => {
@@ -78,14 +79,55 @@ export default function Index() {
     setPausePlayIcon((PausePlayIcon) => (PausePlayIcon === 'caret-right' ? 'pause' : 'caret-right'));
     
     // TEST play something
-    player.seekTo(0);
-    player.play();
+    //player.seekTo(0);
+    //player.play();
 
     setMeasure(-1);
     drift = 0;
   }
 
-  // update sound when user selects a new sound (paired) -- does not work TODO
+  /* async playSound will go here. Possible rename */
+
+  /* start metronome by incrementing measure */
+  useEffect(() => {
+    // Temporaraly commented out to make eslint happy
+    // console.log(isPlaying);
+
+    if (isPlaying) {
+      setMeasure((measure) => (measure + 1));
+    }
+  }, [isPlaying]);
+
+  /* call playSound every interval, taking into account the drift */
+  useEffect(() => {
+    if (isPlaying && measure >= 0) {
+      expected = Date.now() + interval - drift;
+      setTimeout(() => {
+        /* Play sound, accenting the down beat */
+        accentIndicator = buttonStates[measure % beat];
+        // When adding in silence, replace the first "selectedSoundFile" (done 12/6)
+        // eslint-disable-next-line no-nested-ternary, max-len
+        switch (accentIndicator) {
+          case 1:
+            setActualSoundFileToPlay(accentSoundFile);
+            break;
+          case 2:
+            setActualSoundFileToPlay(silentSoundFile);
+            break;
+          default:
+            setActualSoundFileToPlay(normalSoundFile);
+        }
+        player.seekTo(0);
+        player.play();
+        /* increment measure and calculate drift (copied from playSound) */
+        setMeasure((measure) => (measure + 1));
+        actual = Date.now();
+        drift = (actual - expected);
+      }, interval - drift);
+    }
+  }, [measure]);
+
+  // update sound when user selects a new sound (paired)
   useEffect(() => {
     switchSound(
       selectedSoundName,
