@@ -27,6 +27,13 @@ export default function BoxyBox({
     const [incrementing, setIncrementing] = useState(false);
     const [decrementing, setDecrementing] = useState(false);
 
+    // added 121025 as a temp string state to hold whatever the user types, for "parse-on-blur", to hopefully get rid of the bug where it evaluates before done typing
+    const [raw, setRaw] = useState(value.toString());
+
+    useEffect(() => {
+        setRaw(value.toString());
+    }, [value]);
+
     // useEffect for continuous press
     useEffect(() => {
         // try setting interval to the return type of setInterval 121025
@@ -175,9 +182,9 @@ export default function BoxyBox({
                     but the text will not display the right value */}
                     {/* NEW CHANGE 2025: backgroundColor is part of style, and I corrected how it's passed to TextInput */}
                     <TextInput
-                        onChangeText={(text) => updateValue(text)}
-                        value={value.toString()}
-                        defaultValue={value.toString()}
+                        value={raw}
+                        onChangeText={setRaw}
+                        onBlur={() => updateValue(raw)}
                         keyboardType="numeric"
                         cursorColor={COLORS.orange}
                         style={{ 
