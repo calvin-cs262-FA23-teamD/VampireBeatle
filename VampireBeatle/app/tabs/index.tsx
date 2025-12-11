@@ -1,4 +1,5 @@
-import { ImageSourcePropType, Text, View, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableOpacity, Modal } from "react-native";
+import { ImageSourcePropType, Text, View, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableOpacity } from "react-native";
+// EDIT 121125: Do not import Modal from 'react-native'. Use custom Modal component instead (see imports for Beatle below)
 import { Link, useRouter } from "expo-router";     // from tutorial app - CANNOT delete - now used for navigation
 import { Image } from "expo-image";     // from tutorial app - probably can delete TODO
 
@@ -14,7 +15,7 @@ import EmojiSticker from "@/components/EmojiSticker";
 // BEGIN IMPORT COMPONENTS FOR BEATLE -- STARTED 120825 AM
 import PausePlayButton from '@/components/PausePlayButton';
 import Counters from '@/components/Counters';
-//import { Modal } from '../components/Modal.tsx';
+import { Modal } from '@/components/Modal';
 import SoundModal, { switchSound } from '@/components/SoundSelection';
 import SoundButton from '@/components/SoundButton';
 import MetronomeWriting from '@/components/MetronomeWriting';
@@ -182,18 +183,15 @@ export default function Index() {
 
         </View>
 
-        <Modal
-          visible={isMetronomeWritingVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setIsMetronomeWritingVisible(false)}
-        >
-          <View style={{ flex: 1, backgroundColor: COLORS.buttonBackground }}>
-            <MetronomeWriting
-              isModalVisible={isMetronomeWritingVisible}
-              setIsModalVisible={setIsMetronomeWritingVisible}
-            />
-          </View>
+        <Modal isVisible={isMetronomeWritingVisible}>
+          <Modal.Container>
+            <Modal.Body>
+              <MetronomeWriting
+                isModalVisible={isMetronomeWritingVisible}
+                setIsModalVisible={setIsMetronomeWritingVisible}
+              />
+            </Modal.Body>
+          </Modal.Container>
         </Modal>
 
       </ScrollView>

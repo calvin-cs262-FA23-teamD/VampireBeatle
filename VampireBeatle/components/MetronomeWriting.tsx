@@ -26,8 +26,9 @@ export default function MetronomeWriting({
             >
                 <Text style={[stylesMain.title, { marginTop: 0 }]}>Metronome Info</Text>
             </View>
-            <View style={{ flex: 15, padding: 10, justifyContent: 'center' }}>
-                <Text style={[stylesMain.text, { fontSize: 16 }]}>
+            {/*Add alignItems: 'center' so the justified text is in the center of the modal on both web and android 121125 AM*/}
+            <View style={{ flex: 15, padding: 10, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={[stylesMain.text, { fontSize: 16, textAlign: 'justify' }]}>
                     {'Tempo and Beats-Per-Measure :\n'}
                     {'    Tap on number in middle to manually\n      enter in a new value.\n'}
                     {'    Use plus or minus buttons on sides\n      to increase or decrease the value.\n\n'}
