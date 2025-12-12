@@ -212,7 +212,8 @@ export default function TrackbuilderScreen() {
   const [loginText,setLoginText] = useState('Log In');
   const handleLogIn = () => {
     // will do something useful later (TODO)
-    alert('This will do something useful later');
+    //alert('This will do something useful later');
+    router.push('/LogIn');
   };
 
   /** This function is supposed to save a track into the database.

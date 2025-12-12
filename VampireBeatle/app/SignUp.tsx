@@ -38,18 +38,24 @@ function SignUpScreen() {
 
     const handleSignUp = async () => {
         if (newUsername && newPassword && confirmNewPassword) {
-            if (newPassword === confirmNewPassword) {
-                // other code in here
-                alert('Get rekt, loser');
-                router.push('/+not-found');
+            if (newPassword.length >= 6) {
+                if (newPassword === confirmNewPassword) {
+                    // other code in here
+                    alert('Get rekt, loser');
+                    router.push('/+not-found');
+                } else {
+                    // invalid password, show an error message
+                    alert('Your passwords do not match. Please try again.');
+                    return;
+                }
             } else {
-                // invalid password, show an error message
-                alert('Your passwords do not match. Please try again.');
+                // password too short
+                alert('Password must be at least 6 characters long.');
                 return;
             }
         } else {
             // did not enter username and password, show an error message
-            alert('You must enter your username and password');
+            alert('You must enter your username and password.');
             return;
         }
     };
