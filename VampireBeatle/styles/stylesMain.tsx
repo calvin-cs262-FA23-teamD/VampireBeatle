@@ -85,9 +85,27 @@ export const stylesMain = StyleSheet.create({
         flex: 1.5,
     },
 
+    measureBox: {
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderLeftColor: COLORS.background,
+        borderRightColor: COLORS.background,
+    },
+
     plusMinusButtons: {
         alignItems: 'center',
         flex: 1,
+    },
+
+    smallButton: {
+        borderRadius: 20,
+        marginHorizontal: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 5,
+        width: 150,
+        height: 50,
+        backgroundColor: COLORS.buttonBackground,
     },
 
     subView: {
