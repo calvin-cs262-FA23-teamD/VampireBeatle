@@ -45,18 +45,23 @@ export default function Index() {
   const [selectedSoundName, setSelectedSoundName] = useState<SoundName>('Default'); // Initialize selected state with default sound
   
   // the following things were commented out in the original JS file and I'm adding them back for usage with AudioPlayer
-  const [normalSoundFile, setNormalSoundFile] = useState<number>(require('@/assets/sounds/metronome/metronomesound.mp3')); // sound file of selected sound -- renamed for clarity
+  const [normalSoundFile, setNormalSoundFile] = useState<number>(require('@/assets/sounds/metronome/metronomesound.mp3')); // sound file of selected sound -- renamed from selectedSoundFile for clarity
   const [accentSoundFile, setAccentSoundFile] = useState<number>(require('@/assets/sounds/metronome/metronomeaccent.mp3'));
   // add silence
   const [silentSoundFile, setSilentSoundFile] = useState<number>(require('@/assets/sounds/silent/silence.mp3'));
   
-  const [actualSoundFileToPlay, setActualSoundFileToPlay] = useState<number>(normalSoundFile); // current loaded sound -- replace sound and setSound 121125 AM
-  
+  //const [actualSoundFileToPlay, setActualSoundFileToPlay] = useState<number>(normalSoundFile); // current loaded sound -- replace sound and setSound 121125 AM
+  const [actualNormalFileToPlay, setActualNormalFileToPlay] = useState<number>(normalSoundFile);
+  const [actualAccentFileToPlay, setActualAccentFileToPlay] = useState<number>(accentSoundFile);
+
   const [measure, setMeasure] = useState(-1); // current measure
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // NOTE: player is already a hook and will update whenever normalSoundFile changes -- added 121125 AM
-  const player = useAudioPlayer(actualSoundFileToPlay);   // TEST AudioPlayer
+  // NOTE: player is already a hook and will update whenever actualSoundFileToPlay changes -- added 121125 AM
+  //const player = useAudioPlayer(actualSoundFileToPlay);   // TEST AudioPlayer
+  const normalPlayer = useAudioPlayer(actualNormalFileToPlay);
+  const accentPlayer = useAudioPlayer(actualAccentFileToPlay);
+  const silentPlayer = useAudioPlayer(silentSoundFile);
 
 
   const [buttonStates, setButtonStates] = useState(
@@ -87,6 +92,53 @@ export default function Index() {
   }
 
   /* async playSound will go here. Possible rename */
+  /* Plays sound. The function is async meaning that playing an audio file is asynchronouse. */
+  /**
+   * CHANGES: use switch statement instead of if-else (selectedSoundFile was not correct) to switch file(if needed) and play beat,
+   * rename beatSound to accentIndicator (0, 1, or 2), and use new expo-audio AudioPlayer instead of prev expo-av Audio API -- playAsync is not
+   * a function on type AudioPlayer. AudioPlayer is an instance that takes the file (number) itself, circumventing the need for both variable "soundFile" and "sound"
+   * Also renamed variables to improve clarity. Too many similar names and/or misleading names before.
+   * Done 121225 AM
+   */
+  async function playSound() {
+    /* Accent the down beat */
+    accentIndicator = buttonStates[measure % beat];
+    // set the actualSoundFileToPlay according to the accentIndicator
+    switch (accentIndicator) {
+      case 1:
+        //setActualSoundFileToPlay(accentSoundFile);
+        setActualAccentFileToPlay(accentSoundFile);
+        accentPlayer.seekTo(0);
+        accentPlayer.play();
+        break;
+      case 2:
+        //setActualSoundFileToPlay(silentSoundFile);
+        silentPlayer.seekTo(0);
+        silentPlayer.play();
+        break;
+      default:
+        //setActualSoundFileToPlay(normalSoundFile);
+        setActualNormalFileToPlay(normalSoundFile);
+        normalPlayer.seekTo(0);
+        normalPlayer.play();
+    }
+
+    //const { sound } = await Audio.Sound.createAsync(soundFile);
+    //setSound(sound);
+    //await sound.playAsync();
+    
+    //player.seekTo(0);
+    //player.play();
+
+    /* increment measure and calculate drift */
+    setMeasure((measure) => (measure + 1));
+    actual = Date.now();
+    drift = (actual - expected);
+
+    // Temporarally commented out to make eslint happy
+    // console.log(measure);
+    // console.log('drift ', drift);
+  }
 
   /* start metronome by incrementing measure */
   useEffect(() => {
@@ -102,39 +154,31 @@ export default function Index() {
   useEffect(() => {
     if (isPlaying && measure >= 0) {
       expected = Date.now() + interval - drift;
-      setTimeout(() => {
-        /* Play sound, accenting the down beat */
-        accentIndicator = buttonStates[measure % beat];
-        // When adding in silence, replace the first "selectedSoundFile" (done 12/6)
-        // eslint-disable-next-line no-nested-ternary, max-len
-        switch (accentIndicator) {
-          case 1:
-            setActualSoundFileToPlay(accentSoundFile);
-            break;
-          case 2:
-            setActualSoundFileToPlay(silentSoundFile);
-            break;
-          default:
-            setActualSoundFileToPlay(normalSoundFile);
-        }
-        player.seekTo(0);
-        player.play();
-        /* increment measure and calculate drift (copied from playSound) */
-        setMeasure((measure) => (measure + 1));
-        actual = Date.now();
-        drift = (actual - expected);
-      }, interval - drift);
+      setTimeout(playSound, interval - drift);
     }
+
+    //player.seekTo(0);
+    //player.play();
+
   }, [measure]);
 
   // update sound when user selects a new sound (paired)
+  // fix lag in update of accent sound when switching SoundName? 121225 AM
   useEffect(() => {
-    switchSound(
+    setTimeout(() => {
+      switchSound(
+        selectedSoundName,
+        setNormalSoundFile,
+        setAccentSoundFile,
+        setSilentSoundFile
+      )
+    }, interval - drift);
+    /*switchSound(
       selectedSoundName,
       setNormalSoundFile,
       setAccentSoundFile,
       setSilentSoundFile
-    );
+    );*/
   }, [selectedSoundName]);
 
   /* handle the popup screen for changing the technical writing 121025 */

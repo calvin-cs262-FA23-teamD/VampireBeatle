@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function TabLayout() {
     return (
@@ -21,7 +22,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Metronome',
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
+                        <MaterialCommunityIcons name={focused ? 'metronome' : 'metronome-tick'} color={color} size={24} />
                     ),
                 }}
             />
@@ -30,7 +31,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Trackbuilder',
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+                        <MaterialCommunityIcons name={focused ? 'pencil-box-multiple' : 'pencil-box-multiple-outline'} color={color} size={24}/>
                     ),
                 }}
             />
