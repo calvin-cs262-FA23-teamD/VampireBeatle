@@ -20,11 +20,11 @@ import PausePlayButton from '@/components/PausePlayButton';
 import SoundModal, { SoundName, switchSound } from '@/components/SoundSelection';
 import SoundButton from '@/components/SoundButton';
 //import SavedTracks from '@/components/SavedTracks';
-//import TrackbuilderWriting from '@/components/TrackbuilderWriting';
 
 /* Import style files */
 import { stylesMain } from '@/styles/stylesMain';
 import { COLORS } from '@/styles/colors';
+import TrackbuilderWriting from '@/components/TrackbuilderWriting';
 
 /* hard coded click track */
 // define/type measureObject
@@ -203,6 +203,7 @@ export default function TrackbuilderScreen() {
       navigation.navigate('LogIn');
     }*/
     alert('You are trying to access the saved tracks');
+    router.push('/LogIn');
   };
 
   /* This handles the user's login. If the user has logged in, it will log them out.
@@ -422,7 +423,7 @@ export default function TrackbuilderScreen() {
               </View>*/}
 
               {/* interaction buttons */}
-              <View style={{ flex: 4, marginTop: 10, alignItems: 'flex-start' }}>
+              <View style={{ flex: 4, marginTop: 10, alignItems: 'center' }}>
                 <View style={{ alignItems: 'flex-start', flex: 2, flexDirection: 'row' }}>
                   {/* Delete measure */}
                   <View style={{ flex: 2, alignItems: 'flex-start' }}>
@@ -437,10 +438,9 @@ export default function TrackbuilderScreen() {
                     </TouchableOpacity>
                   </View>
                 </View>
-
                 <View style={{ alignItems: 'flex-start', flex: 2, flexDirection: 'row' }}>
                   {/* My Tracks */}
-                  <View style={{ flex: 2, alignItems: 'flex-start' }}>
+                  <View style={{ flex: 2, alignItems: 'center' }}>
                     <TouchableOpacity
                       style={[stylesMain.smallButton, {}]}
                       onPress={handleSavedTrackModal}
@@ -455,6 +455,7 @@ export default function TrackbuilderScreen() {
                     </TouchableOpacity>
                   </View>
                 </View>
+                
                 {/* Sound */}
                 <SoundButton onPress={handleSoundModal} w={300} selectedSound={selectedSound} />
                 {/* Navigate to metronome here once I fix the other things */}
@@ -514,7 +515,10 @@ export default function TrackbuilderScreen() {
         <Modal isVisible={isTrackbuilderWritingVisible}>
           <Modal.Container>
             <Modal.Body>
-              {/* TrackbuilderWriting component will go here */}
+              <TrackbuilderWriting
+                isModalVisible={isTrackbuilderWritingVisible}
+                setIsModalVisible={setIsTrackbuilderWritingVisible}
+              />
             </Modal.Body>
           </Modal.Container>
         </Modal>
