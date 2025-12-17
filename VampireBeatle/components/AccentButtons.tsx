@@ -17,7 +17,7 @@ type AccentButtonProps = {
     //setButtonStates: (value: number) => void;
     setButtonStates: React.Dispatch<React.SetStateAction<number[]>>;
     buttonSize: number;
-}
+};
 
 /**
  * generateButtons from the original AccentButtons.js (old file) was a "plain function" or helper function. In JS, hooks can be used within a plain function.

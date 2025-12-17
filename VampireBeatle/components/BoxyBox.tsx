@@ -181,6 +181,7 @@ export default function BoxyBox({
                     {/* BUG!!! if you enter too low a value, it will update correctly,
                     but the text will not display the right value */}
                     {/* NEW CHANGE 2025: backgroundColor is part of style, and I corrected how it's passed to TextInput */}
+                    {/* NEW CHANGE 2025: setRaw function implemented so that raw "text" is converted to number */}
                     <TextInput
                         value={raw}
                         onChangeText={setRaw}
