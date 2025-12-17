@@ -1,5 +1,5 @@
 SOME USEFUL MESSAGE WILL GO HERE
-### Status: Metronome Screen UI is restored. Metronome Functionality in progress. Trackbuilder in progress. Back-end not started.
+### Status: ALL Screen UIs are restored. Metronome Functionality is functional. Trackbuilder in progress. Back-end not started.
 
 ~~There is currently a "minimum working app", aka you can launch in Expo Go with SDK 54. However you will find that the app is... uhhhhh, not our app. It's the app from the Expo tutorial found [here](https://docs.expo.dev/tutorial/introduction/) (as of 12/05/2025).~~
 
