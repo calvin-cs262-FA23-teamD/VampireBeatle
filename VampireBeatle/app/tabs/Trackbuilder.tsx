@@ -9,6 +9,10 @@ import { useState, useEffect, useRef } from 'react';
 //import { useRoute } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 
+/* Import sound ability */
+//import { Audio } from 'expo-av';    // Audio API in expo-av has been deprecated and expo-av will be removed in SDK 55
+import { AudioPlayer, useAudioPlayer } from "expo-audio";   // replacement of Audio API from expo-av -- npm installed 121125 AM
+
 /* Import design files */
 //import { Audio } from 'expo-av';
 import { AntDesign } from '@expo/vector-icons';
@@ -16,21 +20,22 @@ import { Modal } from '@/components/Modal';
 
 /* Import component files */
 import PausePlayButton from '@/components/PausePlayButton';
-//import AddMeasure from '@/components/AddMeasure';
+import AddMeasure from '@/components/AddMeasure';
 import SoundModal, { SoundName, switchSound } from '@/components/SoundSelection';
 import SoundButton from '@/components/SoundButton';
-//import SavedTracks from '@/components/SavedTracks';
+import SavedTracks from '@/components/SavedTracks';
 
 /* Import style files */
 import { stylesMain } from '@/styles/stylesMain';
 import { COLORS } from '@/styles/colors';
 import TrackbuilderWriting from '@/components/TrackbuilderWriting';
+import { measure } from 'react-native-reanimated';
 
 /* hard coded click track */
 // define/type measureObject
 type measureObject = {
     clickTrackID: number;
-    measurenum?: number;
+    measurenum: number;
     tempo: number;
     timesig: number;
     sound: SoundName | 'notused';
@@ -146,10 +151,29 @@ export default function TrackbuilderScreen() {
   const [pausePlayIcon, setPausePlayIcon] = useState<keyof typeof AntDesign.glyphMap>('caret-right');
 
   /** these determine what sound to play */
-  const [selectedSound, setSelectedSound] = useState<SoundName>('Default'); // Initialize selected state with default sound
+  const [selectedSoundName, setSelectedSoundName] = useState<SoundName>('Default'); // Initialize selected state with default sound
 
+  /* The following were copied from index.tsx on 121725 AM */
+  // the following things were commented out in the original JS file and I'm adding them back for usage with AudioPlayer
+  const [normalSoundFile, setNormalSoundFile] = useState<number>(require('@/assets/sounds/metronome/metronomesound.mp3')); // sound file of selected sound -- renamed from selectedSoundFile for clarity
+  const [accentSoundFile, setAccentSoundFile] = useState<number>(require('@/assets/sounds/metronome/metronomeaccent.mp3'));
+  // add silence
+  const [silentSoundFile, setSilentSoundFile] = useState<number>(require('@/assets/sounds/silent/silence.mp3'));
 
+  const [actualNormalFileToPlay, setActualNormalFileToPlay] = useState<number>(normalSoundFile);
+  const [actualAccentFileToPlay, setActualAccentFileToPlay] = useState<number>(accentSoundFile);
 
+  /** This keeps track of what beat the track is on */
+  const [count, setCount] = useState(-1); // current beat
+
+  /** These keep track of number of beats and the tempos of each measure */
+  const [beatList, setBeatList] = useState<number[]>([]);       // list of all the accent values of each beat
+  const [tempoList, setTempoList] = useState<number[]>([]);     // list of tempos of each beat
+
+  // copy AudioPlayers from index.tsx 121725 AM
+  const normalPlayer = useAudioPlayer(actualNormalFileToPlay);
+  const accentPlayer = useAudioPlayer(actualAccentFileToPlay);
+  const silentPlayer = useAudioPlayer(silentSoundFile);
 
 
   /**  The following section of code controls the various modals that can
@@ -163,12 +187,11 @@ export default function TrackbuilderScreen() {
    */
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const handleAddModal = () => {
-    /*if (isAddModalVisible) {
-      //addMeasure();
-      // TODO later: get this working
-    }*/
-    //setIsAddModalVisible(() => !isAddModalVisible);
-    alert('Nothing to see here so far');
+    if (isAddModalVisible) {
+      addMeasure();
+    }
+    setIsAddModalVisible(() => !isAddModalVisible);
+    //alert('Nothing to see here so far');
   };
 
   /** This handles the SoundModal, which is where the user can change the sound
@@ -319,19 +342,45 @@ export default function TrackbuilderScreen() {
    * @return the updated clicktrack
    */
   const flatListRef = useRef(null);
-  // MORE CODE WILL GO HERE TODO
   const deleteMeasure = () => {
-    /*if (selectedMeasure != null) {
+    if (selectedMeasure != null) {
       measures.splice(selectedMeasure - 1, 1);
       // Update the 'number' property of the remaining measures
       for (let i: number = 0; i < measures.length; i++) {
         measures[i].measurenum = i + 1;
       }
+      // actually fine, because the "error" just says it might be null. Which it isn't, because this is in the selectedMeasure != null block. AM 121725
+      // @ts-ignore
       flatListRef.current.forceUpdate();
-    }*/
-    // currently does nothing
-    alert('You clicked the delete button, which does nothing');
+    }
+    alert('You clicked the delete button');
   };
+
+  /** This function reads the clicktrack and generates a list of the sound and tempo of each beat
+   * @param measures the clicktrack
+   *
+   * @return set the values of newTempoList and newCountList
+  */
+  function setUpTrack() {
+    const newCountList: number[] = [];      // add type for TypeScript conversion
+    const newTempoList: number[] = [60];    // add type for TypeScript conversion
+    let i: number = 0;
+    measures.forEach((measure) => {
+      for (i = 0; i < measure.measurenum; i++) {
+        if (i === 0) { newCountList.push(1); } else { newCountList.push(0); }
+        newTempoList.push(measure.tempo);
+      }
+    });
+    setBeatList(newCountList);
+    setTempoList(newTempoList);
+  }
+
+
+  let expected: number = 0;   // initialize
+  let actual: number = 0;     // initialize
+  let drift: number = 0;
+
+  let accentIndicator: number;
 
   /** This function hangles whether the track should start or stop playing.
    * @param isPlaying tells if the function is currently playing'
@@ -340,10 +389,94 @@ export default function TrackbuilderScreen() {
   const togglePausePlay = () => {
     setIsPlaying((isPlaying) => !isPlaying);
     setPausePlayIcon((pausePlayIcon) => (pausePlayIcon === 'caret-right' ? 'pause' : 'caret-right'));
-    // TODO more code later
-    //setCount(-1);
-    //drift = 0;
+    setCount(-1);
+    drift = 0;
   };
+
+    /** this code triggers the clicktrack to start playing  by incrementing count */
+  useEffect(() => {
+    if (isPlaying) {
+      setUpTrack();
+      setCount((count) => (count + 1));
+    }
+  }, [isPlaying]);
+
+  /** This function plays a beat by loading the sound, playing it, and incrementing the count,
+   * which triggers the next sound
+   * @param expected when we expect the beat to occur
+   * @param actual when the beat actually occurs
+   * @param drift variation between expected beat and actual beat
+   * @param beatlist what beat are they on?
+   * @param accentSoundFile sound of accent beat
+   * @param selectedSoundFile sound of selected sound
+  */
+  async function playSound() {
+    if (count < beatList.length) {
+      // Play sound, accenting the down beat
+      accentIndicator = beatList[count];
+
+      // set the actualSoundFileToPlay according to the accentIndicator
+      switch (accentIndicator) {
+        case 1:
+          setActualAccentFileToPlay(accentSoundFile);
+          accentPlayer.seekTo(0);
+          accentPlayer.play();
+          break;
+        case 2:
+          silentPlayer.seekTo(0);
+          silentPlayer.play();
+          break;
+        default:
+          setActualNormalFileToPlay(normalSoundFile);
+          normalPlayer.seekTo(0);
+          normalPlayer.play();
+      }
+
+      // increment to next count and calculate drift
+      setCount((count) => (count + 1));
+      actual = Date.now();
+      drift = (actual - expected);
+
+      // console.log(count);
+      // console.log('drift ', drift);
+    } else {
+      togglePausePlay();
+    }
+  }
+
+  /** this code calls the next beat to start playing by setting up the expected,
+   *  and calling a timeout
+   * @param isPlaying is the clicktrack playing
+   * @param tempoList list of tempos throughout clicktrack
+   * @param expected when the next beat should be
+   * @param drift how much the beat is off
+  */
+ useEffect(() => {
+  if (isPlaying && count >= 0) {
+    // console.log(count);
+    // console.log(tempoList[count]);
+
+    expected = Date.now() + ((60 / tempoList[count]) * 1000) - drift;
+    setTimeout(playSound, ((60 / tempoList[count]) * 1000) - drift);
+  }
+
+ }, [count]);
+
+  // update sound when user selects a new sound (paired)
+  // copied from index.tsx to implement sound switching 121725 AM
+  useEffect(() => {
+    setTimeout(() => {
+      switchSound(
+        selectedSoundName,
+        setNormalSoundFile,
+        setAccentSoundFile,
+        setSilentSoundFile
+      )
+    }, ((60 / tempoList[count]) * 1000) - drift);
+  }, [selectedSoundName]);
+
+
+
 
   return (
     <KeyboardAvoidingView
@@ -408,20 +541,19 @@ export default function TrackbuilderScreen() {
                 />
               </View>
 
-              {/* Display of TrackList -- does not work come back later}
+              {/* Display of TrackList -- does not work come back later}*/}
+              {/* warning may be caused by use of FlatList within ScrollView,
+                potential solution to use SectionList instead }*/}
               <View style={{ maxHeight: 250 }}>
-                {/* warning may be caused by use of FlatList within ScrollView,
-                potential solution to use SectionList instead }
                 <FlatList
                   ref={flatListRef}
                   data={measures}
-                  renderItem={renderMeasure}}
-
+                  renderItem={renderMeasure}
                   extraData={selectedMeasure}
                   vertical
                   showsVerticalScrollIndicator={false}
                 />
-              </View>*/}
+              </View>
 
               {/* interaction buttons */}
               <View style={{ flex: 4, marginTop: 10, alignItems: 'center' }}>
@@ -458,8 +590,8 @@ export default function TrackbuilderScreen() {
                 </View>
                 
                 {/* Sound */}
-                <SoundButton onPress={handleSoundModal} w={300} selectedSound={selectedSound} />
-                {/* Navigate to metronome here once I fix the other things */}
+                <SoundButton onPress={handleSoundModal} w={300} selectedSound={selectedSoundName} />
+                {/* Navigate to metronome */}
                 <View style={[stylesMain.footer, {}]}>
                   <TouchableOpacity
                     style={[stylesMain.flatButton, { width: 300, alignSelf: 'center', marginBottom: 10 }]}
@@ -484,6 +616,17 @@ export default function TrackbuilderScreen() {
           <Modal.Container>
             <Modal.Body>
               {/* AddMeasure component will go here */}
+              <AddMeasure
+                newMeasureNum={newMeasureNum}
+                setNewMeasureNum={setNewMeasureNum}
+                newTempo={newTempo}
+                setNewTempo={setNewTempo}
+                newBeat={newBeat}
+                setNewBeat={setNewBeat}
+                isModalVisible={isAddModalVisible}
+                setIsModalVisible={setIsAddModalVisible}
+                handleModal={handleAddModal}
+              />
             </Modal.Body>
           </Modal.Container>
         </Modal>
@@ -493,8 +636,8 @@ export default function TrackbuilderScreen() {
           <Modal.Container>
             <Modal.Body>
               <SoundModal
-                selectedSound={selectedSound}
-                setSelectedSound={setSelectedSound}
+                selectedSound={selectedSoundName}
+                setSelectedSound={setSelectedSoundName}
                 isModalVisible={isSoundModalVisible}
                 setIsModalVisible={setIsSoundModalVisible}
                 handleModal={handleSoundModal}
@@ -507,7 +650,14 @@ export default function TrackbuilderScreen() {
         <Modal isVisible={isSavedTrackVisible}>
           <Modal.Container>
             <Modal.Body>
-              {/* SavedTracks component will go here */}
+              <SavedTracks
+                isModalVisible={isSavedTrackVisible}
+                setIsModalVisible={setIsSavedTrackVisible}
+                selectedTrackID={selectedTrackID}
+                setSelectedTrackID={setSelectedTrackID}
+                setSelectedTrackName={setSelectedTrackName}
+                //id={id}
+              />
             </Modal.Body>
           </Modal.Container>
         </Modal>
