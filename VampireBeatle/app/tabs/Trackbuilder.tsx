@@ -396,7 +396,7 @@ export default function TrackbuilderScreen() {
     /** this code triggers the clicktrack to start playing  by incrementing count */
   useEffect(() => {
     if (isPlaying) {
-      setUpTrack();     // IMPLEMENT TODO
+      setUpTrack();
       setCount((count) => (count + 1));
     }
   }, [isPlaying]);

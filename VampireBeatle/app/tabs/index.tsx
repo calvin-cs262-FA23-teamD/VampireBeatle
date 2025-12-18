@@ -24,10 +24,9 @@ import { AntDesign } from "@expo/vector-icons";
 
 
 // splash screen junk (does not work)
-/*import * as SplashScreen from 'expo-splash-screen';
-import { ImageSourcePropType } from "react-native/types_generated/index";
+import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
-setTimeout(SplashScreen.hideAsync, 5000);*/
+setTimeout(SplashScreen.hideAsync, 5000);
 
 // test AudioPlayer stuff outside of default function
 const testAudioSource = require('@/assets/sounds/metronome/metronomesound.mp3');
