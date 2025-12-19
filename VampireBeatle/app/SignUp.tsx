@@ -9,6 +9,9 @@ import { useRouter } from 'expo-router';
 
 import { AntDesign } from '@expo/vector-icons';
 
+// 121925 to test local backend
+import { API_URL } from '@/services/api';;
+
 /* Import style code */
 // eslint-disable-next-line import/named
 import { stylesMain } from '@/styles/stylesMain';
@@ -17,6 +20,19 @@ import { COLORS } from '@/styles/colors';
 
 // eslint-disable-next-line no-unused-vars
 import LogInScreen from '@/app/LogIn';
+
+// define a User type that matches what the backend returns 121925 AM
+type User = {
+    id: number;
+    username: string;
+    // backend should not return passwords
+};
+
+// define a CreateUserPayload type that matches what the backend expects 121925 AM
+type CreateUserPayload = {
+    username: string;
+    password: string;
+};
 
 function SignUpScreen() {
     // added 121225 AM
@@ -29,11 +45,47 @@ function SignUpScreen() {
 
     // eslint-disable-next-line no-unused-vars
     const [isLoading, setLoading] = useState(true);
-    //const [data, setData] = useState([]);
+    const [data, setData] = useState<User[]>([]);       // properly typed data array after defining User type 121925 AM
 
     // more code here once back-end is set up TODO
+    const getUsers = async () => {
+        try {
+            const response = await fetch(`${API_URL}/allUsers`);
+            const json = await response.json();
+            setData(json);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    
+    const createUser = async (newUserData: CreateUserPayload): Promise<void> => {
+        try {
+            const response = await fetch(`${API_URL}/makeUser`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any additional headers as needed
+                },
+                body: JSON.stringify(newUserData),
+            });
+
+            const json = await response.json();
+
+            // Handle the response or update the UI as needed
+            console.log('User created:', json);
+        } catch (error) {
+            console.error('Error creating user:', error);
+
+            // Handle the error or update the UI as needed
+        }
+    };
+
+
+    useEffect(() => {
+        getUsers();
+    }, []);    
 
 
     const handleSignUp = async () => {
@@ -41,8 +93,22 @@ function SignUpScreen() {
             if (newPassword.length >= 6) {
                 if (newPassword === confirmNewPassword) {
                     // other code in here
-                    alert('Get rekt, loser');
-                    router.push('/+not-found');
+                    //alert('Get rekt, loser');
+                    //router.push('/+not-found');
+
+                    // added 121925 AM. Untested.
+                    const payload: CreateUserPayload = {
+                        username: newUsername,
+                        password: newPassword,
+                    };
+
+                    await createUser(payload);
+
+                    alert('User created successfully!');
+
+                    router.push('./LogIn');
+                    // end added 121925 AM. Untested.
+
                 } else {
                     // invalid password, show an error message
                     alert('Your passwords do not match. Please try again.');

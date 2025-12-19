@@ -496,7 +496,7 @@ export default function TrackbuilderScreen() {
                 style={[stylesMain.smallButton, { backgroundColor: COLORS.background }]}
                 onPress={handleLogIn}
               >
-                <Text style={[stylesMain.text, { color: COLORS.orange }]}>Log In</Text>
+                <Text style={[stylesMain.text, { color: COLORS.orange }]}>{loginText}</Text>
               </TouchableOpacity>
             </View>
             {/* Page Title */}

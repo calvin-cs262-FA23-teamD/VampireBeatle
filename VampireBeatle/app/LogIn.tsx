@@ -7,12 +7,28 @@ import {
 } from 'react-native';
 // added 121225 AM
 import { useRouter } from 'expo-router';
+// added 121925 AM
+import { API_URL } from '@/services/api';
 
 import { AntDesign } from '@expo/vector-icons';
 
 /* Import style code */
 import { stylesMain } from '@/styles/stylesMain';
 import { COLORS } from '@/styles/colors';
+
+// define a User type that matches what the backend returns 121925 AM
+type User = {
+    id: number;
+    username: string;
+    // backend should not return passwords but I'm doing it anyway for now
+    password: string;
+};
+
+// define a CreateUserPayload type that matches what the backend expects 121925 AM
+type CreateUserPayload = {
+    username: string;
+    password: string;
+};
 
 function LogInScreen() {
     
@@ -23,25 +39,49 @@ function LogInScreen() {
     const [password, setPassword] = useState("");
 
     // other code will go here TODO
+    const [isLoading, setIsLoading] = useState(true);
+    const [data, setData] = useState<User[]>([]);
+
+    const getUsers = async () => {
+        try {
+            const response = await fetch(`${API_URL}/allUsers`);
+            const json = await response.json();
+            setData(json);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    let userID: number = 0;
 
     // eslint-disable-next-line no-unused-vars
     const handleLogin = async () => {
-        // Add login logic here (for now just an alert)
+        // Add login logic here (for now just an alert) TODO
         // Check username and password, navigate to the next screen on success, show an error on failure
-
+       
         alert('The log in button was pressed');
-        /*for (let i = 0; i < data.length; i++) {
-        if (username === data[i].username && password === data[i].password) {
-            userID = data[i].id;
-            // console.log('User: ', userID);
-            navigation.navigate('Trackbuilder', { id: userID });
-            return;
+        console.log('Data: ', data);
+        for (let i = 0; i < data.length; i++) {
+            if (username === data[i].username && password === data[i].password) {
+                userID = data[i].id;
+                console.log('User: ', userID);
+                //navigation.navigate('Trackbuilder', { id: userID });
+                router.push('/tabs/Trackbuilder');
+                return;
+            }
         }
-        // // add back alert (A)
-        // alert('Invalid username-password combination');
-        // console.log('user not found');
-        }*/
+        // add back alert (A)
+        alert('Invalid username-password combination');
+        console.log('user not found');
+        return;
     };
+
+    // always fetch users on load (was here before; add back) 121925 AM
+    useEffect(() => {
+        getUsers();
+    }, []);
 
     // navigate to signup screen (new) 121225 AM
     const handleSignUp = () => {
