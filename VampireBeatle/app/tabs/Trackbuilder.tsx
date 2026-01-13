@@ -30,6 +30,13 @@ import { stylesMain } from '@/styles/stylesMain';
 import { COLORS } from '@/styles/colors';
 import TrackbuilderWriting from '@/components/TrackbuilderWriting';
 import { measure } from 'react-native-reanimated';
+import { API_URL } from '@/services/api';
+
+// define/type TrackData
+type TrackData = {
+  name: string;
+  date: string;
+};
 
 /* hard coded click track */
 // define/type measureObject
@@ -39,7 +46,7 @@ type measureObject = {
     tempo: number;
     timesig: number;
     sound: SoundName | 'notused';
-}
+};
 
 const defaultMeasures: measureObject[] = [
   {
@@ -142,6 +149,10 @@ export default function TrackbuilderScreen() {
   const [selectedTrackName, setSelectedTrackName] = useState('New Track');
 
 
+  // NEW UNTESTED CODE TO HANDLE LOGIN STATUS 011326 AM -- to replace triple-purpose id variable
+  const [loggedInFlag, setLoggedInFlag] = useState(false);
+
+
 
    /* The following code implements playing of the clicktrack
   *
@@ -209,7 +220,7 @@ export default function TrackbuilderScreen() {
    */
   const [isTrackbuilderWritingVisible, setIsTrackbuilderWritingVisible] = useState(false);
   const handleTrackbuilderWriting = () => {
-    setIsTrackbuilderWritingVisible(() => ! isTrackbuilderWritingVisible);
+    setIsTrackbuilderWritingVisible(() => !isTrackbuilderWritingVisible);
     alert('Later this will show some information about the trackbuilder.');
   };
 
@@ -242,6 +253,17 @@ export default function TrackbuilderScreen() {
   /** This function is supposed to save a track into the database.
    * However, It is currently not implemented */
   const saveTrack = () => {
+    if (!loggedInFlag) {
+      router.push('/LogIn');
+    }
+    // TODO add in save track code
+    // console.log('save track');
+    const newTrackData: TrackData = {
+      //userID: id,
+      name: selectedTrackName,
+      date: '1772-01-01',
+    };
+    createClickTrack(newTrackData);
     /*if (!id) {
       navigation.navigate('LogIn');
     }
@@ -272,7 +294,7 @@ export default function TrackbuilderScreen() {
     }
   };
   
-  /** the folling section of code handles the clicktrack content,
+  /** the following section of code handles the clicktrack content,
    * rendering the clicktrack onto the screen,
      * and adding or deleting measures.
     */
@@ -475,7 +497,91 @@ export default function TrackbuilderScreen() {
     }, ((60 / tempoList[count]) * 1000) - drift);
   }, [selectedSoundName]);
 
+  const createClickTrack = async (newTrackData: TrackData) => {
+    try {
+      const response = await fetch(`${API_URL}/makeClickTrack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTrackData),
+      });
 
+      const track = await response.json();
+
+      // Handle the response or update the UI as needed
+      let i: number;
+      for (i = 0; i < measures.length; i++) {
+        measures[i].clickTrackID = track.id;
+        createMeasure(measures[i]);
+      }
+    } catch (error) {
+      // console.error('Error creating click track:', error);
+
+      // Handle the error or update the UI as needed
+    }
+  };
+
+  const createMeasure = async (newMeasureData: measureObject) => {
+    try {
+      const response = await fetch(`${API_URL}/makeMeasure`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newMeasureData),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        // console.error('Server returned an error:', response.status, response.statusText);
+        // Handle the error or update the UI as needed
+        return;
+      }
+
+      // Handle the response or update the UI as needed
+      // console.log('Measure created:', json);
+    } catch (error) {
+      // console.error('Error creating measure:', error);
+
+      // Handle the error or update the UI as needed
+    }
+  };
+
+  const getMeasures = async () => {
+    try {
+      // const response = await fetch(`https://beatleservice.azurewebsites.net/aClickTrack/${0}`);
+      const response = await fetch(`${API_URL}/allMeasures`);
+      const json = await response.json();
+
+      let trackMeasures: measureObject[] = [];
+      trackMeasures = json.filter((item: measureObject) => item.clickTrackID === selectedTrackID);
+      //trackMeasures = json.filter((item) => item.clickTrackID === selectedTrackID);
+      /*trackMeasures = trackMeasures.sort((a, b) => {
+        if (a.measurenum < b.measurenum) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });*/
+
+      // ******** fix this TODO
+      // let intermediate = 0;
+      // if (intermediate === 0) {
+      //  intermediate++
+      // } else{}
+      measures = trackMeasures;
+      // console.log('measures:', trackMeasures);
+    } catch (error) {
+      // console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    // console.log('this is the trackID: ', selectedTrackID);
+    getMeasures();
+  }, [selectedTrackID]);
 
 
   return (

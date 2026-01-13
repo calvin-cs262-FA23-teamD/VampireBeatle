@@ -41,6 +41,7 @@ function LogInScreen() {
     // other code will go here TODO
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState<User[]>([]);
+    const [loggedInFlag, setLoggedInFlag] = useState(false);
 
     const getUsers = async () => {
         try {
@@ -69,6 +70,8 @@ function LogInScreen() {
                 console.log('User: ', userID);
                 //navigation.navigate('Trackbuilder', { id: userID });
                 router.push('/tabs/Trackbuilder');
+                // set Trackbuilder loggedInFlag to true
+                setLoggedInFlag(true);
                 return;
             }
         }
