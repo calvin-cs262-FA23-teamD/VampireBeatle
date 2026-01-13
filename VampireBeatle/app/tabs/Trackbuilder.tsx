@@ -32,6 +32,9 @@ import TrackbuilderWriting from '@/components/TrackbuilderWriting';
 import { measure } from 'react-native-reanimated';
 import { API_URL } from '@/services/api';
 
+/* Import AuthContext to manage login status 011326 AM */
+import { useAuth } from '@/app/AuthContext';
+
 // define/type TrackData
 type TrackData = {
   name: string;
@@ -142,7 +145,11 @@ export default function TrackbuilderScreen() {
   
   // TODO: A bunch of code will go in here. Right now I will just focus on the layout then work backwards.
 
+  // AuthContext usage to manage login status 011326 AM
+  const { loggedInFlag, setLoggedInFlag, username } = useAuth();
 
+  // default title text (will change if user is logged in)
+  const [titleText, setTitleText] = useState('Trackbuilder');
 
   //* These are hooks meant to help with the implementation of the database
   const [selectedTrackID, setSelectedTrackID] = useState(50000000);
@@ -150,8 +157,8 @@ export default function TrackbuilderScreen() {
 
 
   // NEW UNTESTED CODE TO HANDLE LOGIN STATUS 011326 AM -- to replace triple-purpose id variable
-  const [loggedInFlag, setLoggedInFlag] = useState(false);
-
+  //const [loggedInFlag, setLoggedInFlag] = useState(false);
+  // replaced with global AuthContext 011326 AM
 
 
    /* The following code implements playing of the clicktrack
@@ -230,14 +237,19 @@ export default function TrackbuilderScreen() {
    */
   const [isSavedTrackVisible, setIsSavedTrackVisible] = useState(false);
   const handleSavedTrackModal = () => {
-    /* id code has not been implemented TODO
+    /* id code has not been implemented TODO -- UPDATE IMPLEMENTED 011326 AM
     if (id) {
       setIsSavedTrackVisible(() => !isSavedTrackVisible);
     } else {
       navigation.navigate('LogIn');
     }*/
     alert('You are trying to access the saved tracks');
-    router.push('/LogIn');
+    if (loggedInFlag) {
+      setIsSavedTrackVisible(() => !isSavedTrackVisible);
+    } else {
+      alert('must log in to access saved tracks');
+      router.push('/LogIn');
+    }
   };
 
   /* This handles the user's login. If the user has logged in, it will log them out.
@@ -247,8 +259,29 @@ export default function TrackbuilderScreen() {
   const handleLogIn = () => {
     // will do something useful later (TODO)
     //alert('This will do something useful later');
-    router.push('/LogIn');
+    if (loggedInFlag) {
+      // if logged in, log out
+      setLoggedInFlag(false);
+      setLoginText('Log In');
+      setSelectedTrackName('New Track');
+      measures = defaultMeasures;
+      // temp 011326 AM TODO
+      setTitleText('Trackbuilder');
+      alert('You have been logged out');
+    } else {
+      // otherwise go to log in screen
+      router.push('/LogIn');
+    }
   };
+
+  /** This helps to correctly change the text of the login logout button */
+  // updated based on loggedInFlag and username 011326 AM
+  useEffect(() => {
+    // console.log('the user was changed. It is now: ', id);
+    loggedInFlag ? setLoginText('Log Out') : setLoginText('Log In');
+    // if logged in, change title text to the user's UN
+    loggedInFlag ? setTitleText(`Welcome, ${username}!`) : setTitleText('Trackbuilder');
+  }, [loggedInFlag, username]);
 
   /** This function is supposed to save a track into the database.
    * However, It is currently not implemented */
@@ -607,7 +640,7 @@ export default function TrackbuilderScreen() {
             </View>
             {/* Page Title */}
             <View style={[stylesMain.header, { flex: 3, height: '100%' }]}>
-              <Text style={stylesMain.title}>Trackbuilder</Text>
+              <Text style={stylesMain.title}>{titleText}</Text>
             </View>
             {/* Info button */}
             <View style={[stylesMain.subView, { flex: 1 }]}>
