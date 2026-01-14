@@ -1,6 +1,10 @@
 // partially copied from LogIn.js 121225 AM
 // please note that the back-end is non-functional so that part wasn't copied over
 
+// attempt to use AuthContext begins here UNTESTED TODO
+import { useAuth } from '@/app/AuthContext';
+// end attempt to use AuthContext UNTESTED TODO
+
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
@@ -15,6 +19,7 @@ import { AntDesign } from '@expo/vector-icons';
 /* Import style code */
 import { stylesMain } from '@/styles/stylesMain';
 import { COLORS } from '@/styles/colors';
+import TrackbuilderScreen from './tabs/Trackbuilder';
 
 // define a User type that matches what the backend returns 121925 AM
 type User = {
@@ -31,7 +36,11 @@ type CreateUserPayload = {
 };
 
 function LogInScreen() {
-    
+    // attempt to use AuthContext begins here 011326 AM
+    // include setUsername here
+    const { setLoggedInFlag, setUsername: setAuthUsername } = useAuth();
+
+
     // added 121225 AM
     const router = useRouter();
 
@@ -69,6 +78,10 @@ function LogInScreen() {
                 console.log('User: ', userID);
                 //navigation.navigate('Trackbuilder', { id: userID });
                 router.push('/tabs/Trackbuilder');
+                // set Trackbuilder loggedInFlag to true - added 011326 AM
+                setLoggedInFlag(true);
+                // set Trackbuilder username to the logged in user - added 011326 AM
+                setAuthUsername(username);
                 return;
             }
         }

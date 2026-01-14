@@ -30,6 +30,16 @@ import { stylesMain } from '@/styles/stylesMain';
 import { COLORS } from '@/styles/colors';
 import TrackbuilderWriting from '@/components/TrackbuilderWriting';
 import { measure } from 'react-native-reanimated';
+import { API_URL } from '@/services/api';
+
+/* Import AuthContext to manage login status 011326 AM */
+import { useAuth } from '@/app/AuthContext';
+
+// define/type TrackData
+type TrackData = {
+  name: string;
+  date: string;
+};
 
 /* hard coded click track */
 // define/type measureObject
@@ -39,7 +49,7 @@ type measureObject = {
     tempo: number;
     timesig: number;
     sound: SoundName | 'notused';
-}
+};
 
 const defaultMeasures: measureObject[] = [
   {
@@ -135,12 +145,20 @@ export default function TrackbuilderScreen() {
   
   // TODO: A bunch of code will go in here. Right now I will just focus on the layout then work backwards.
 
+  // AuthContext usage to manage login status 011326 AM
+  const { loggedInFlag, setLoggedInFlag, username } = useAuth();
 
+  // default title text (will change if user is logged in)
+  const [titleText, setTitleText] = useState('Trackbuilder');
 
   //* These are hooks meant to help with the implementation of the database
   const [selectedTrackID, setSelectedTrackID] = useState(50000000);
   const [selectedTrackName, setSelectedTrackName] = useState('New Track');
 
+
+  // NEW UNTESTED CODE TO HANDLE LOGIN STATUS 011326 AM -- to replace triple-purpose id variable
+  //const [loggedInFlag, setLoggedInFlag] = useState(false);
+  // replaced with global AuthContext 011326 AM
 
 
    /* The following code implements playing of the clicktrack
@@ -209,7 +227,7 @@ export default function TrackbuilderScreen() {
    */
   const [isTrackbuilderWritingVisible, setIsTrackbuilderWritingVisible] = useState(false);
   const handleTrackbuilderWriting = () => {
-    setIsTrackbuilderWritingVisible(() => ! isTrackbuilderWritingVisible);
+    setIsTrackbuilderWritingVisible(() => !isTrackbuilderWritingVisible);
     alert('Later this will show some information about the trackbuilder.');
   };
 
@@ -219,14 +237,19 @@ export default function TrackbuilderScreen() {
    */
   const [isSavedTrackVisible, setIsSavedTrackVisible] = useState(false);
   const handleSavedTrackModal = () => {
-    /* id code has not been implemented TODO
+    /* id code has not been implemented TODO -- UPDATE IMPLEMENTED 011326 AM
     if (id) {
       setIsSavedTrackVisible(() => !isSavedTrackVisible);
     } else {
       navigation.navigate('LogIn');
     }*/
     alert('You are trying to access the saved tracks');
-    router.push('/LogIn');
+    if (loggedInFlag) {
+      setIsSavedTrackVisible(() => !isSavedTrackVisible);
+    } else {
+      alert('must log in to access saved tracks');
+      router.push('/LogIn');
+    }
   };
 
   /* This handles the user's login. If the user has logged in, it will log them out.
@@ -236,12 +259,44 @@ export default function TrackbuilderScreen() {
   const handleLogIn = () => {
     // will do something useful later (TODO)
     //alert('This will do something useful later');
-    router.push('/LogIn');
+    if (loggedInFlag) {
+      // if logged in, log out
+      setLoggedInFlag(false);
+      setLoginText('Log In');
+      setSelectedTrackName('New Track');
+      measures = defaultMeasures;
+      // temp 011326 AM TODO
+      setTitleText('Trackbuilder');
+      alert('You have been logged out');
+    } else {
+      // otherwise go to log in screen
+      router.push('/LogIn');
+    }
   };
+
+  /** This helps to correctly change the text of the login logout button */
+  // updated based on loggedInFlag and username 011326 AM
+  useEffect(() => {
+    // console.log('the user was changed. It is now: ', id);
+    loggedInFlag ? setLoginText('Log Out') : setLoginText('Log In');
+    // if logged in, change title text to the user's UN
+    loggedInFlag ? setTitleText(`Welcome, ${username}!`) : setTitleText('Trackbuilder');
+  }, [loggedInFlag, username]);
 
   /** This function is supposed to save a track into the database.
    * However, It is currently not implemented */
   const saveTrack = () => {
+    if (!loggedInFlag) {
+      router.push('/LogIn');
+    }
+    // TODO add in save track code
+    // console.log('save track');
+    const newTrackData: TrackData = {
+      //userID: id,
+      name: selectedTrackName,
+      date: '1772-01-01',
+    };
+    createClickTrack(newTrackData);
     /*if (!id) {
       navigation.navigate('LogIn');
     }
@@ -272,7 +327,7 @@ export default function TrackbuilderScreen() {
     }
   };
   
-  /** the folling section of code handles the clicktrack content,
+  /** the following section of code handles the clicktrack content,
    * rendering the clicktrack onto the screen,
      * and adding or deleting measures.
     */
@@ -475,7 +530,91 @@ export default function TrackbuilderScreen() {
     }, ((60 / tempoList[count]) * 1000) - drift);
   }, [selectedSoundName]);
 
+  const createClickTrack = async (newTrackData: TrackData) => {
+    try {
+      const response = await fetch(`${API_URL}/makeClickTrack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTrackData),
+      });
 
+      const track = await response.json();
+
+      // Handle the response or update the UI as needed
+      let i: number;
+      for (i = 0; i < measures.length; i++) {
+        measures[i].clickTrackID = track.id;
+        createMeasure(measures[i]);
+      }
+    } catch (error) {
+      // console.error('Error creating click track:', error);
+
+      // Handle the error or update the UI as needed
+    }
+  };
+
+  const createMeasure = async (newMeasureData: measureObject) => {
+    try {
+      const response = await fetch(`${API_URL}/makeMeasure`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newMeasureData),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        // console.error('Server returned an error:', response.status, response.statusText);
+        // Handle the error or update the UI as needed
+        return;
+      }
+
+      // Handle the response or update the UI as needed
+      // console.log('Measure created:', json);
+    } catch (error) {
+      // console.error('Error creating measure:', error);
+
+      // Handle the error or update the UI as needed
+    }
+  };
+
+  const getMeasures = async () => {
+    try {
+      // const response = await fetch(`https://beatleservice.azurewebsites.net/aClickTrack/${0}`);
+      const response = await fetch(`${API_URL}/allMeasures`);
+      const json = await response.json();
+
+      let trackMeasures: measureObject[] = [];
+      trackMeasures = json.filter((item: measureObject) => item.clickTrackID === selectedTrackID);
+      //trackMeasures = json.filter((item) => item.clickTrackID === selectedTrackID);
+      /*trackMeasures = trackMeasures.sort((a, b) => {
+        if (a.measurenum < b.measurenum) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });*/
+
+      // ******** fix this TODO
+      // let intermediate = 0;
+      // if (intermediate === 0) {
+      //  intermediate++
+      // } else{}
+      measures = trackMeasures;
+      // console.log('measures:', trackMeasures);
+    } catch (error) {
+      // console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    // console.log('this is the trackID: ', selectedTrackID);
+    getMeasures();
+  }, [selectedTrackID]);
 
 
   return (
@@ -501,7 +640,7 @@ export default function TrackbuilderScreen() {
             </View>
             {/* Page Title */}
             <View style={[stylesMain.header, { flex: 3, height: '100%' }]}>
-              <Text style={stylesMain.title}>Trackbuilder</Text>
+              <Text style={stylesMain.title}>{titleText}</Text>
             </View>
             {/* Info button */}
             <View style={[stylesMain.subView, { flex: 1 }]}>
