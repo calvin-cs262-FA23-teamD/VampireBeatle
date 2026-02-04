@@ -1,9 +1,8 @@
 // partially copied from LogIn.js 121225 AM
 // please note that the back-end is non-functional so that part wasn't copied over
 
-// attempt to use AuthContext begins here UNTESTED TODO
+// attempt to use AuthContext begins here 011326 AM
 import { useAuth } from '@/app/AuthContext';
-// end attempt to use AuthContext UNTESTED TODO
 
 import React, { useState, useEffect } from 'react';
 import {
