@@ -78,7 +78,7 @@ export default function Index() {
 
   // BEGIN FUNCTIONS SPECIFIC TO BEATLE -- STARTED 120825 AM
   const togglePausePlay = () => {
-    setIsPlaying((isPlaying) => !isPlaying);
+    setIsPlaying((isPlaying) => (isPlaying === true) ? false : true);
 
     setPausePlayIcon((PausePlayIcon) => (PausePlayIcon === 'caret-right' ? 'pause' : 'caret-right'));
     
@@ -242,11 +242,9 @@ export default function Index() {
             <TouchableOpacity
               style={[stylesMain.flatButton, { alignSelf: 'center', marginBottom: 10 }]}
               onPress={() => {
-                //if (isPlaying) {
-                if (pausePlayIcon === 'pause') {    // if "playing" (TODO later)
+                if (isPlaying) {
                   togglePausePlay();
                 }
-                // navigate to trackbuilder using Expo Router
                 router.push("/tabs/Trackbuilder");
               }}
             >
